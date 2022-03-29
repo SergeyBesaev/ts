@@ -1,48 +1,71 @@
-import { Person } from '../entity/person'
-import { Client } from 'pg'
+import { UserRepo } from '../repo/user.repo'
+import { UserWithRolesDTO } from '../dto/user.with.roles.DTO'
+import Repos from '../repo/repos'
 
 export class PersonService {
 
-    constructor(private readonly dbClient: Client) {
+    private readonly userRepo: UserRepo
+
+    constructor(repos: Repos) {
+        this.userRepo = repos.userRepo
     }
 
-    public async getPerson(id: number): Promise<Person> {
-        const abc = await this.dbClient.query<Person>({
-            text: 'select * from person where id = $1',
-            values: [id]
-        })
-        return abc.rows[0]
+    public async fetchUserWithRoles(login: string): Promise<UserWithRolesDTO>{
+        const fetchUser = await this.userRepo.fetchUserByLogin(login)
+        const fetchRoles = await this.userRepo.fetchRolesByUserLogin(login)
+
+        return {
+            user: fetchUser,
+            roles: fetchRoles
+        }
     }
 
-    public async getAllPerson() {
-        const abc = await this.dbClient.query<Array<Person>>({
-            text: 'select * from person'
-        })
-        return abc.rows
+    public async updateUser(dto: UserWithRolesDTO) {
+        await this.validation(dto)
+
+        await this.userRepo.updateUser(dto)
+        return this.fetchUserWithRoles(dto.user.login)
     }
 
-    public async deletePersonById(id: number) {
-        await this.dbClient.query({
-            text: 'delete from person where id = $1',
-            values: [id]
-        })
-        return this.getAllPerson()
+    public async deleteUserByLogin(login: string) {
+        return this.userRepo.deleteUserByLogin(login)
     }
 
-    public async savePerson(person: Person) {
-        await this.dbClient.query({
-            text: 'insert into person (name, age) values ($1, $2)',
-            values: [person.name, person.age]
-        })
-        return this.getAllPerson()
+    public async saveUserWithRoles(dto: UserWithRolesDTO) {
+        await this.validation(dto)
+
+        await this.userRepo.saveUser(dto.user)
+        await this.userRepo.saveRolesForUsers(dto.user, dto.roles)
+
+        return this.fetchUserWithRoles(dto.user.login)
     }
 
-    public async updatePerson(id: number, person: Person) {
-        await this.dbClient.query({
-            text: 'update person set name = $1, age = $2 where id = $3',
-            values: [person.name, person.age, id]
-        })
-        return this.getPerson(id)
+    public async fetchAllUsers() {
+        return await this.userRepo.fetchAllUsers()
     }
 
+    private async validation (dto: UserWithRolesDTO) {
+        const validChar = new RegExp(/(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])/)
+        const validNumChar = new RegExp(/(?=.{1,64})/)
+        const validNumCharPassword = new RegExp(/(?=.{8,64})/)
+
+
+        if (!dto.user.password.match(validChar)) {
+            throw new Error('Password is not valid')
+        }
+
+        if(!dto.user.name.match(validNumChar)) {
+            throw new Error('')
+        }
+
+        if (!dto.user.login.match(validNumChar)) {
+            throw new Error('')
+        }
+
+        if (!dto.user.password.match(validNumCharPassword)) {
+            throw new Error('The minimum number of characters is 8')
+        }
+
+
+    }
 }

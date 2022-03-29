@@ -3,15 +3,19 @@ import { initSimpleAPI } from './api/SimpleApi'
 import Services from './service/services'
 import { PersonService } from './service/person.service'
 import { initDB } from './db/init'
+import { UserRepo } from './repo/user.repo'
+import { Client } from 'pg'
+import Repos from './repo/repos'
 
 export class App {
 
     async run() {
         const app = express()
 
-        const dbClint = await initDB()
+        const dbClient = await initDB()
+        const repos = this.initRepos(dbClient)
 
-        const services: Services = { personService: new PersonService(dbClint) }
+        const services = this.initServices(repos)
 
         initSimpleAPI(app, services)
 
@@ -21,6 +25,19 @@ export class App {
             console.log(`Example app listening on port ${port}`)
         })
     }
+
+    private initServices(repos: Repos): Services {
+        return {
+            personService: new PersonService(repos),
+        }
+    }
+
+    private initRepos(dbClient: Client): Repos {
+        return {
+            userRepo: new UserRepo(dbClient)
+        }
+    }
+
 }
 
 
