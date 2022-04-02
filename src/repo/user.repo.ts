@@ -35,6 +35,8 @@ export class UserRepo {
     }
 
     public async saveUserInDB(user: User) {
+        await this.validation(user)
+
         await this.dbClient.query({
             text: 'insert into users (name, login, password) values ($1, $2, $3)',
             values: [user.name, user.login, user.password]
@@ -43,6 +45,8 @@ export class UserRepo {
 
 
     public async updateUserByLogin(login: string, dto: UserWithRolesDto) {
+        await this.validation(dto.user)
+
         if (dto.roles.size != 0) {
             await this.deleteRolesByUser(login)
             await this.saveRolesForUsers(login, dto.roles)
@@ -67,6 +71,24 @@ export class UserRepo {
                 values: [login, role.id]
             })
         })
+    }
+
+    private async validation(user: User) {
+        const nameAndLoginCheck = new RegExp(/(?=.{1,64})/)
+        const password = new RegExp(/(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])/)
+
+        if(!user.name.match(nameAndLoginCheck)) {
+            throw new Error('Field Name must be 8 characters or more')
+        }
+
+        if(!user.login.match(nameAndLoginCheck)) {
+            throw new Error('Field Login must be 8 characters or more')
+        }
+
+        if(!user.password.match(password)) {
+            throw new Error('Password is not valid')
+        }
+
     }
 
     private async deleteRolesByUser(login: string) {

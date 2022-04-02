@@ -6,7 +6,6 @@ export function roleApi(
     { roleService }: IService
 ) {
 
-    app.use(express.json())
 
     app.route('/roles')
         .get(async (req, res) => {
