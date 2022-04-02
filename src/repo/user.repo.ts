@@ -3,7 +3,7 @@ import { User } from '../entity/user'
 import { UserWithRolesDto } from '../dto/user.with.roles.dto'
 import { Role } from '../entity/role'
 
-export class Repo {
+export class UserRepo {
 
     constructor(private readonly dbClient: Client) {
     }

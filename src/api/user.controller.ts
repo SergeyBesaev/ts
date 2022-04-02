@@ -4,7 +4,7 @@ import asyncHandler from 'express-async-handler'
 
 export function initApi(
     app: express.Express,
-    { service }: IService
+    { userService }: IService
 ) {
 
     function errorHandler() {
@@ -39,27 +39,27 @@ export function initApi(
 
     app.route('/users')
         .get(asyncHandler( async (req, res, next) => {
-            res.locals.body = await service.fetchAllUsers()
+            res.locals.body = await userService.fetchAllUsers()
             next()
         }))
         .post(asyncHandler(async (req, res, next) => {
             const dto = { ...req.body }
 
-            res.locals.body = await service.saveUser(dto)
+            res.locals.body = await userService.saveUser(dto)
             next()
         }))
 
     app.route('/users/:login')
         .get(async (req, res) => {
-            const user = await service.fetchUserByLogin(req.params.login)
+            const user = await userService.fetchUserByLogin(req.params.login)
             res.json(user)
         })
         .put(async (req, res) =>{
-            const user = await service.updateUser(req.params.login, { ...req.body })
+            const user = await userService.updateUser(req.params.login, { ...req.body })
             res.json(user)
         })
         .delete(async (req, res) => {
-            const usersList = await service.deleteUserByLogin(req.params.login)
+            const usersList = await userService.deleteUserByLogin(req.params.login)
             res.json(usersList)
         })
 

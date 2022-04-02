@@ -1,5 +1,7 @@
-import { Repo } from './repo'
+import { UserRepo } from './user.repo'
+import { RoleRepo } from './role.repo'
 
 export default interface IRepo {
-    repo: Repo
+    userRepo: UserRepo
+    roleRepo: RoleRepo
 }

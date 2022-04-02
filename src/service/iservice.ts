@@ -1,5 +1,7 @@
-import { Service } from './service'
+import { UserService } from './user.service'
+import { RoleService } from './role.service'
 
 export default interface IService {
-    service: Service
+    userService: UserService
+    roleService: RoleService
 }

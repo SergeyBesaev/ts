@@ -3,9 +3,12 @@ import { initApi } from './api/user.controller'
 import { initDB } from './db/init'
 import { Client } from 'pg'
 import IRepo from './repo/irepo'
-import { Repo } from './repo/repo'
+import { UserRepo } from './repo/user.repo'
 import IService from './service/iservice'
-import { Service } from './service/service'
+import { UserService } from './service/user.service'
+import { RoleRepo } from './repo/role.repo'
+import { RoleService } from './service/role.service'
+import { roleApi } from './api/role.controller'
 
 export class App {
 
@@ -17,6 +20,7 @@ export class App {
         const service = this.initService(repo)
 
         initApi(app, service)
+        roleApi(app, service)
 
         const port = 8080
 
@@ -27,17 +31,18 @@ export class App {
 
     private initRepo(dbClient: Client): IRepo {
         return {
-            repo: new Repo(dbClient)
+            userRepo: new UserRepo(dbClient),
+            roleRepo: new RoleRepo(dbClient),
         }
     }
 
     private initService(repo: IRepo): IService {
         return {
-            service: new Service(repo)
+            userService: new UserService(repo),
+            roleService: new RoleService(repo),
         }
     }
 
 }
-
 
 void new App().run()

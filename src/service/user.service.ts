@@ -1,14 +1,14 @@
 import IRepo from '../repo/irepo'
-import { Repo } from '../repo/repo'
+import { UserRepo } from '../repo/user.repo'
 import { User } from '../entity/user'
 import { UserWithRolesDto } from '../dto/user.with.roles.dto'
 
-export class Service {
+export class UserService {
 
-    private readonly repo: Repo
+    private readonly repo: UserRepo
 
     constructor(repo: IRepo) {
-        this.repo = repo.repo
+        this.repo = repo.userRepo
     }
 
     public async fetchAllUsers() {
