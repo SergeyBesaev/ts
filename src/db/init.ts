@@ -1,7 +1,6 @@
 import { Client } from 'pg'
 
 export async function initDB() {
-
     const client = new Client({
         user: 'sergey',
         host: 'localhost',
@@ -12,5 +11,4 @@ export async function initDB() {
 
     await client.connect()
     return client
-
 }

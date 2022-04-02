@@ -1,23 +1,22 @@
 import express from 'express'
-import { initSimpleAPI } from './api/SimpleApi'
-import Services from './service/services'
-import { PersonService } from './service/person.service'
+import { initApi } from './api/user.controller'
 import { initDB } from './db/init'
-import { UserRepo } from './repo/user.repo'
 import { Client } from 'pg'
-import Repos from './repo/repos'
+import IRepo from './repo/irepo'
+import { Repo } from './repo/repo'
+import IService from './service/iservice'
+import { Service } from './service/service'
 
 export class App {
 
     async run() {
         const app = express()
 
-        const dbClient = await initDB()
-        const repos = this.initRepos(dbClient)
+        const dbClientDb = initDB()
+        const repo = this.initRepo(await dbClientDb)
+        const service = this.initService(repo)
 
-        const services = this.initServices(repos)
-
-        initSimpleAPI(app, services)
+        initApi(app, service)
 
         const port = 8080
 
@@ -26,15 +25,15 @@ export class App {
         })
     }
 
-    private initServices(repos: Repos): Services {
+    private initRepo(dbClient: Client): IRepo {
         return {
-            personService: new PersonService(repos),
+            repo: new Repo(dbClient)
         }
     }
 
-    private initRepos(dbClient: Client): Repos {
+    private initService(repo: IRepo): IService {
         return {
-            userRepo: new UserRepo(dbClient)
+            service: new Service(repo)
         }
     }
 
